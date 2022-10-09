@@ -522,12 +522,14 @@ class X12Sheet(X12General):
         self.warned_no_row_num = 0
         self.process_stream = self.own_process_stream
 
-    def own_process_stream(self, stream, heading=None):
+    def own_process_stream(self, stream, heading=None, sample_rows=None):
         if self.verbosity >= 2 and heading is not None:
             fprintf(self.logfile, "\n=== %s ===\n", heading)
         row_tag = U_SSML12 + "row"
         self_do_row = self.do_row
         for event, elem in ET.iterparse(stream):
+            if sample_rows and self.rowx > sample_rows:
+                break
             if elem.tag == row_tag:
                 self_do_row(elem)
                 elem.clear()  # destroy all child elements (cells)
@@ -777,7 +779,7 @@ class BetterBook(Book):
         self.x12component_names = None
         self.x12sheet_list = []
 
-    def get_sheet(self, sh_number, update_pos=True):
+    def get_sheet(self, sh_number, update_pos=True, sample_rows=None):
         fname = self.x12book.sheet_targets[sh_number]
         zflo = self.x12zf.open(self.x12component_names[fname])
 
@@ -785,7 +787,7 @@ class BetterBook(Book):
         x12sheet = X12Sheet(sheet, self.logfile, self.verbosity)
 
         heading = "Sheet %r (sheetx=%d) from %r" % (sheet.name, sh_number, fname)
-        x12sheet.process_stream(zflo, heading)
+        x12sheet.process_stream(zflo, heading, sample_rows)
         del zflo
 
         rels_fname = 'xl/worksheets/_rels/%s.rels' % fname.rsplit('/', 1)[-1]

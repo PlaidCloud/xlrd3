@@ -425,12 +425,12 @@ class Book(BaseObject):
                 self.get_sheet(sheetx)
         return self._sheet_list[:]
 
-    def sheet_by_index(self, sheetx):
+    def sheet_by_index(self, sheetx, sample_rows=None):
         """
         :param sheetx: Sheet index in ``range(nsheets)``
         :returns: A :class:`~xlrd.sheet.Sheet`.
         """
-        return self._sheet_list[sheetx] or self.get_sheet(sheetx)
+        return self._sheet_list[sheetx] or self.get_sheet(sheetx, sample_rows=sample_rows)
 
     def __iter__(self):
         """
@@ -440,7 +440,7 @@ class Book(BaseObject):
         for i in range(self.nsheets):
             yield self.sheet_by_index(i)
 
-    def sheet_by_name(self, sheet_name):
+    def sheet_by_name(self, sheet_name, sample_rows=None):
         """
         :param sheet_name: Name of the sheet required.
         :returns: A :class:`~xlrd.sheet.Sheet`.
@@ -449,7 +449,7 @@ class Book(BaseObject):
             sheetx = self._sheet_names.index(sheet_name)
         except ValueError:
             raise XLRDError('No sheet named <%r>' % sheet_name)
-        return self.sheet_by_index(sheetx)
+        return self.sheet_by_index(sheetx, sample_rows=sample_rows)
 
     def __getitem__(self, item):
         """
@@ -675,7 +675,7 @@ class Book(BaseObject):
         self._position = pos + length
         return code, length, data
 
-    def get_sheet(self, sh_number, update_pos=True):
+    def get_sheet(self, sh_number, update_pos=True, sample_rows=None):
         if self._resources_released:
             raise XLRDError("Can't load sheets after releasing resources.")
         if update_pos:

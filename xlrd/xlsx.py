@@ -29,7 +29,7 @@ def ensure_elementtree_imported(verbosity, logfile):
     if ET is not None:
         return
 
-    candidates = ["lxml.etree", "defusedxml.cElementTree", "xml.etree.ElementTree"]
+    candidates = ["defusedxml.ElementTree", "lxml.etree", "xml.etree.ElementTree"]
     for name in candidates:
         try:
             lib = import_module(name)
